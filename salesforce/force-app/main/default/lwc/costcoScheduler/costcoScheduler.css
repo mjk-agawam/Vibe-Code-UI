@@ -1,0 +1,245 @@
+/* ── Wrapper ──────────────────────────────────────────────────────────────── */
+.app-wrapper {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 16px 40px;
+    color: #1a1a2e;
+}
+
+/* ── Header ───────────────────────────────────────────────────────────────── */
+.app-header {
+    display: flex;
+    align-items: center;
+    padding: 16px 0 12px;
+    border-bottom: 2px solid #E31837;
+    margin-bottom: 24px;
+    gap: 12px;
+}
+.logo-svg {
+    width: 48px;
+    height: 48px;
+}
+.header-sub {
+    font-size: 15px;
+    font-weight: 600;
+    color: #E31837;
+    letter-spacing: 0.3px;
+}
+
+/* ── Toast ────────────────────────────────────────────────────────────────── */
+.toast {
+    background: #c0392b;
+    color: #fff;
+    padding: 12px 18px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    font-size: 14px;
+    animation: fadeIn 0.2s;
+}
+@keyframes fadeIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ── Screen 1: Company grid ───────────────────────────────────────────────── */
+.screen-companies h1 {
+    font-size: 22px;
+    font-weight: 700;
+    margin: 0 0 6px;
+}
+.screen-sub {
+    color: #666;
+    margin: 0 0 24px;
+    font-size: 14px;
+}
+.company-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
+}
+.company-card {
+    border: 1.5px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 20px 18px;
+    cursor: pointer;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    background: #fff;
+}
+.company-card:hover {
+    border-color: #E31837;
+    box-shadow: 0 4px 16px rgba(227,24,55,0.12);
+}
+.company-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+}
+.company-name    { font-size: 15px; font-weight: 700; margin-bottom: 2px; }
+.company-service { font-size: 12px; font-weight: 600; margin-bottom: 6px; }
+.company-tagline { font-size: 12px; color: #777; margin-bottom: 10px; line-height: 1.4; }
+.company-meta    { display: flex; gap: 10px; }
+.meta-item       { font-size: 11px; color: #888; background: #f5f5f5; padding: 3px 8px; border-radius: 20px; }
+.loading-msg     { color: #888; padding: 24px 0; }
+
+/* ── Screen 2 & 3: Booking card ───────────────────────────────────────────── */
+.back-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #555;
+    font-size: 13px;
+    padding: 0 0 14px;
+    display: block;
+    transition: color 0.15s;
+}
+.back-btn:hover { color: #E31837; }
+
+.booking-card {
+    display: flex;
+    border: 1.5px solid #e0e0e0;
+    border-radius: 16px;
+    overflow: hidden;
+    background: #fff;
+    min-height: 480px;
+}
+.booking-left {
+    width: 220px;
+    min-width: 220px;
+    padding: 28px 20px;
+    background: #fafafa;
+    border-right: 1.5px solid #e0e0e0;
+}
+.booking-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 14px;
+}
+.booking-vendor { font-size: 13px; color: #888; margin-bottom: 4px; }
+.booking-title  { font-size: 16px; font-weight: 700; margin-bottom: 10px; }
+.booking-detail { font-size: 12px; color: #666; margin-bottom: 6px; }
+.booking-desc   { font-size: 12px; color: #888; margin-top: 14px; line-height: 1.5; }
+
+.booking-right  { flex: 1; padding: 24px; overflow-y: auto; }
+
+/* ── Calendar ─────────────────────────────────────────────────────────────── */
+.section-title  { font-size: 14px; font-weight: 700; color: #333; margin-bottom: 14px; }
+.loading-label  { font-size: 11px; color: #999; font-weight: 400; }
+
+.cal-nav        { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.cal-nav-btn    { background: none; border: none; cursor: pointer; font-size: 18px; color: #333; padding: 4px 8px; border-radius: 6px; transition: background 0.15s; }
+.cal-nav-btn:hover { background: #f0f0f0; }
+.cal-month-label { font-size: 14px; font-weight: 600; }
+
+.cal-grid       { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; margin-bottom: 16px; }
+.cal-header     { text-align: center; font-size: 10px; font-weight: 600; color: #999; padding: 4px 0; text-transform: uppercase; }
+.cal-day        { text-align: center; padding: 7px 4px; font-size: 13px; border-radius: 8px; color: #ccc; min-width: 32px; }
+.blank          { pointer-events: none; }
+.cal-past       { color: #ccc; }
+.cal-today      { color: #E31837; font-weight: 700; }
+.cal-has-slots  { cursor: pointer; }
+.cal-has-slots:hover { background: #FDECEA; }
+.cal-selected   { background: #E31837 !important; color: #fff !important; font-weight: 700; border-radius: 8px; }
+
+/* ── Time slots ───────────────────────────────────────────────────────────── */
+.slots-section { border-top: 1px solid #f0f0f0; padding-top: 14px; }
+.slots-title   { font-size: 13px; font-weight: 600; margin-bottom: 10px; color: #333; }
+.slots-grid    { display: flex; flex-wrap: wrap; gap: 8px; }
+.slot-btn {
+    padding: 8px 16px;
+    border: 1.5px solid #ddd;
+    border-radius: 8px;
+    background: #fff;
+    font-size: 13px;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+.slot-btn:hover { border-color: #E31837; color: #E31837; background: #FDECEA; }
+.slot-selected  { background: #E31837; color: #fff; border-color: #E31837; }
+.slots-empty    { color: #999; font-size: 13px; }
+
+/* ── Form ─────────────────────────────────────────────────────────────────── */
+.form-title        { font-size: 18px; font-weight: 700; margin: 0 0 8px; }
+.form-selected-time { font-size: 13px; color: #555; margin-bottom: 20px; }
+
+.form-row { display: flex; gap: 12px; }
+.form-row .form-group { flex: 1; }
+
+.form-group       { margin-bottom: 14px; }
+.form-group label { display: block; font-size: 12px; font-weight: 600; color: #444; margin-bottom: 5px; }
+.form-input {
+    width: 100%;
+    padding: 9px 12px;
+    border: 1.5px solid #ddd;
+    border-radius: 8px;
+    font-size: 13px;
+    transition: border-color 0.15s;
+    box-sizing: border-box;
+    font-family: inherit;
+}
+.form-input:focus { outline: none; border-color: #E31837; }
+.form-textarea    { min-height: 80px; resize: vertical; }
+
+.submit-btn {
+    width: 100%;
+    padding: 13px;
+    background: #E31837;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: background 0.15s;
+}
+.submit-btn:hover:not(:disabled) { background: #C0102A; }
+.submit-btn-disabled { background: #f0a0ac !important; cursor: not-allowed; }
+
+/* ── Confirmation ─────────────────────────────────────────────────────────── */
+.screen-confirm {
+    text-align: center;
+    padding: 40px 24px;
+    max-width: 520px;
+    margin: 0 auto;
+}
+.confirm-check {
+    width: 64px;
+    height: 64px;
+    background: #FDECEA;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    color: #E31837;
+    margin: 0 auto 18px;
+}
+.screen-confirm h1 { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+.screen-confirm p  { color: #666; font-size: 14px; margin-bottom: 24px; }
+
+.confirm-details {
+    background: #fafafa;
+    border: 1.5px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 16px 20px;
+    text-align: left;
+    margin-bottom: 20px;
+}
+.confirm-row {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 8px 0;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 13px;
+}
+.confirm-row:last-child { border-bottom: none; }
+.confirm-label { font-size: 11px; color: #888; margin-bottom: 2px; }
+.confirm-value { font-size: 13px; font-weight: 600; }
+.confirm-id    { font-size: 11px; color: #aaa; margin-bottom: 20px; font-family: monospace; }

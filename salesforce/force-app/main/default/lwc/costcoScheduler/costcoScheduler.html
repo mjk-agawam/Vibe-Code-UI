@@ -1,0 +1,204 @@
+<template>
+    <div class="app-wrapper">
+
+        <!-- Header -->
+        <div class="app-header">
+            <div class="header-logo">
+                <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" class="logo-svg">
+                    <circle cx="60" cy="60" r="59" fill="#005DAA"/>
+                    <circle cx="60" cy="60" r="54" fill="#ffffff"/>
+                    <text x="60" y="62" text-anchor="middle" font-family="Impact,'Arial Black',Arial,sans-serif" font-weight="900" font-style="italic" font-size="30" fill="#E31837" letter-spacing="-0.5">COSTCO</text>
+                    <rect x="7" y="66" width="106" height="3.2" fill="#005DAA"/>
+                    <rect x="7" y="72" width="106" height="3.2" fill="#005DAA"/>
+                    <rect x="7" y="78" width="106" height="3.2" fill="#005DAA"/>
+                    <rect x="24" y="65" width="72" height="17.4" fill="#ffffff"/>
+                    <text x="60" y="79" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-style="italic" font-size="11.5" fill="#005DAA" letter-spacing="1.2">WHOLESALE</text>
+                    <rect x="7" y="66" width="17" height="3.2" fill="#005DAA"/>
+                    <rect x="7" y="72" width="17" height="3.2" fill="#005DAA"/>
+                    <rect x="7" y="78" width="17" height="3.2" fill="#005DAA"/>
+                    <rect x="96" y="66" width="17" height="3.2" fill="#005DAA"/>
+                    <rect x="96" y="72" width="17" height="3.2" fill="#005DAA"/>
+                    <rect x="96" y="78" width="17" height="3.2" fill="#005DAA"/>
+                </svg>
+            </div>
+            <span class="header-sub">Vendor Appointment Booking</span>
+        </div>
+
+        <!-- Toast -->
+        <template lwc:if={showToast}>
+            <div class="toast">{toastMsg}</div>
+        </template>
+
+        <!-- Screen 1: Company Select -->
+        <template lwc:if={isCompanyScreen}>
+            <div class="screen-companies">
+                <h1>Book a Home Services Consultation</h1>
+                <p class="screen-sub">Select a vendor to schedule a free in-home consultation in Gwinnett County, GA.</p>
+                <template lwc:if={loadingCompanies}>
+                    <div class="loading-msg">Loading vendors…</div>
+                </template>
+                <div class="company-grid">
+                    <template for:each={companies} for:item="c">
+                        <div key={c.id} class="company-card" data-id={c.id} onclick={handleSelectCompany}>
+                            <div class="company-icon" style={c.iconStyle}>
+                                <lightning-icon icon-name={c.icon} size="small" style="--lwc-colorTextIconDefault: #fff;"></lightning-icon>
+                            </div>
+                            <div class="company-name">{c.name}</div>
+                            <div class="company-service" style={c.serviceStyle}>{c.service}</div>
+                            <div class="company-tagline">{c.tagline}</div>
+                            <div class="company-meta">
+                                <span class="meta-item">⏱ 60 min</span>
+                                <span class="meta-item">📍 In-Person</span>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </template>
+
+        <!-- Screen 2: Calendar + Slots -->
+        <template lwc:if={isBookingScreen}>
+            <div class="screen-booking">
+                <button class="back-btn" onclick={handleBackToCompanies}>← All vendors</button>
+                <div class="booking-card">
+                    <!-- Left panel -->
+                    <div class="booking-left">
+                        <div class="booking-icon" style={selectedCompany.iconStyle}>
+                            <lightning-icon icon-name={selectedCompany.icon} size="small" style="--lwc-colorTextIconDefault: #fff;"></lightning-icon>
+                        </div>
+                        <div class="booking-vendor">{selectedCompany.name}</div>
+                        <div class="booking-title">{selectedCompany.service} Consultation</div>
+                        <div class="booking-detail">⏱ 60 minutes</div>
+                        <div class="booking-detail">📍 In-Person · Gwinnett County, GA</div>
+                        <div class="booking-desc">
+                            Meet with a {selectedCompany.name} specialist at your home to discuss your
+                            {selectedCompany.service} needs and receive a free quote.
+                        </div>
+                    </div>
+                    <!-- Right panel -->
+                    <div class="booking-right">
+                        <div class="section-title">
+                            Select a Date &amp; Time
+                            <template lwc:if={loadingSlots}>
+                                <span class="loading-label"> Loading…</span>
+                            </template>
+                        </div>
+                        <!-- Calendar nav -->
+                        <div class="cal-nav">
+                            <button class="cal-nav-btn" onclick={handlePrevMonth}>‹</button>
+                            <span class="cal-month-label">{calMonthLabel}</span>
+                            <button class="cal-nav-btn" onclick={handleNextMonth}>›</button>
+                        </div>
+                        <!-- Day headers -->
+                        <div class="cal-grid">
+                            <div class="cal-header">SUN</div>
+                            <div class="cal-header">MON</div>
+                            <div class="cal-header">TUE</div>
+                            <div class="cal-header">WED</div>
+                            <div class="cal-header">THU</div>
+                            <div class="cal-header">FRI</div>
+                            <div class="cal-header">SAT</div>
+                            <!-- Day cells -->
+                            <template for:each={calendarDays} for:item="day">
+                                <div key={day.key} class={day.cssClass} style={day.style}
+                                     data-key={day.key} onclick={handleSelectDate}>{day.label}</div>
+                            </template>
+                        </div>
+                        <!-- Time slots -->
+                        <template lwc:if={selectedDate}>
+                            <div class="slots-section">
+                                <div class="slots-title">{selectedDateLabel}</div>
+                                <template lwc:if={hasSelectedDateSlots}>
+                                    <div class="slots-grid">
+                                        <template for:each={selectedDateSlots} for:item="slot">
+                                            <button key={slot.key} class={slot.cssClass}
+                                                    data-index={slot.index} onclick={handleSelectSlot}>
+                                                {slot.label}
+                                            </button>
+                                        </template>
+                                    </div>
+                                </template>
+                                <template lwc:else>
+                                    <div class="slots-empty">No available times for this day.</div>
+                                </template>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </template>
+
+        <!-- Screen 3: Booking Form -->
+        <template lwc:if={isFormScreen}>
+            <div class="screen-form">
+                <button class="back-btn" onclick={handleBackToBooking}>← Back to calendar</button>
+                <div class="booking-card">
+                    <!-- Left panel -->
+                    <div class="booking-left">
+                        <div class="booking-icon" style={selectedCompany.iconStyle}>
+                            <lightning-icon icon-name={selectedCompany.icon} size="small" style="--lwc-colorTextIconDefault: #fff;"></lightning-icon>
+                        </div>
+                        <div class="booking-vendor">{selectedCompany.name}</div>
+                        <div class="booking-title">{selectedCompany.service} Consultation</div>
+                        <div class="booking-detail">⏱ 60 minutes</div>
+                        <div class="booking-detail">📍 In-Person · Gwinnett County, GA</div>
+                    </div>
+                    <!-- Form -->
+                    <div class="booking-right">
+                        <h2 class="form-title">Enter Your Details</h2>
+                        <div class="form-selected-time">📅 {selectedSlotLabel}</div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>First Name *</label>
+                                <input type="text" class="form-input" placeholder="Jane"
+                                       data-field="firstName" value={firstName} onchange={handleFieldChange} />
+                            </div>
+                            <div class="form-group">
+                                <label>Last Name *</label>
+                                <input type="text" class="form-input" placeholder="Smith"
+                                       data-field="lastName" value={lastName} onchange={handleFieldChange} />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Email Address *</label>
+                            <input type="email" class="form-input" placeholder="jane@example.com"
+                                   data-field="email" value={email} onchange={handleFieldChange} />
+                        </div>
+                        <div class="form-group">
+                            <label>Phone Number</label>
+                            <input type="tel" class="form-input" placeholder="(555) 123-4567"
+                                   data-field="phone" value={phone} onchange={handleFieldChange} />
+                        </div>
+                        <div class="form-group">
+                            <label>Additional Notes</label>
+                            <textarea class="form-input form-textarea" placeholder="Any questions for the consultant…"
+                                      data-field="notes" onchange={handleFieldChange}>{notes}</textarea>
+                        </div>
+                        <button class={submitBtnClass} disabled={bookingInProgress} onclick={handleSubmit}>
+                            {submitBtnLabel}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </template>
+
+        <!-- Screen 4: Confirmation -->
+        <template lwc:if={isConfirmScreen}>
+            <div class="screen-confirm">
+                <div class="confirm-check">✓</div>
+                <h1>Appointment Confirmed!</h1>
+                <p>Your consultation has been scheduled. A representative will reach out to confirm details.</p>
+                <div class="confirm-details">
+                    <div class="confirm-row">🏠 <div><div class="confirm-label">Vendor</div><div class="confirm-value">{selectedCompany.name}</div></div></div>
+                    <div class="confirm-row">⏱ <div><div class="confirm-label">Service</div><div class="confirm-value">{selectedCompany.service} Consultation · 60 min</div></div></div>
+                    <div class="confirm-row">📅 <div><div class="confirm-label">Date &amp; Time</div><div class="confirm-value">{selectedSlotLabel}</div></div></div>
+                    <div class="confirm-row">📍 <div><div class="confirm-label">Location</div><div class="confirm-value">Gwinnett County, GA (In-Person)</div></div></div>
+                    <div class="confirm-row">👤 <div><div class="confirm-label">Customer</div><div class="confirm-value">{customerDisplay}</div></div></div>
+                </div>
+                <div class="confirm-id">{confirmApptId}</div>
+                <button class="submit-btn" onclick={handleNewBooking}>Book Another Appointment</button>
+            </div>
+        </template>
+
+    </div>
+</template>
