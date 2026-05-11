@@ -1,8 +1,11 @@
 public with sharing class CostcoSchedulerController {
 
-    private static final String TERRITORY_ID = '0HhHu000001TK26KAG';
-    private static final String API_VERSION  = 'v63.0';
-    private static final String BASE_URL     = 'https://mjk-260320.my.salesforce.com';
+    private static final String TERRITORY_ID  = '0HhHu000001TK26KAG';
+    private static final String API_VERSION   = 'v63.0';
+    private static final String BASE_URL      = 'https://mjk-260320.my.salesforce.com';
+    // Named Credential label (used for guest/anonymous Experience Cloud access).
+    // Set to null to fall back to UserInfo.getSessionId() for authenticated users.
+    private static final String NAMED_CRED   = 'CostcoSchedulerNC';
 
     // ── Company definitions ──────────────────────────────────────────────────
     private static final List<Map<String, String>> COMPANY_DATA = new List<Map<String, String>>{
@@ -192,9 +195,16 @@ public with sharing class CostcoSchedulerController {
     // ── Helpers ──────────────────────────────────────────────────────────────
     private static HttpResponse sfCallout(String method, String path, String body) {
         HttpRequest req = new HttpRequest();
-        req.setEndpoint(BASE_URL + path);
+        // Use Named Credential when available (supports guest/anonymous Experience Cloud users).
+        // Falls back to session ID for authenticated internal users.
+        Boolean useNC = String.isNotBlank(NAMED_CRED);
+        if (useNC) {
+            req.setEndpoint('callout:' + NAMED_CRED + path);
+        } else {
+            req.setEndpoint(BASE_URL + path);
+            req.setHeader('Authorization', 'Bearer ' + UserInfo.getSessionId());
+        }
         req.setMethod(method);
-        req.setHeader('Authorization', 'Bearer ' + UserInfo.getSessionId());
         req.setHeader('Content-Type', 'application/json');
         req.setHeader('Accept', 'application/json');
         if (String.isNotBlank(body)) req.setBody(body);
