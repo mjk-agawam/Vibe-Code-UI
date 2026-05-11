@@ -2,6 +2,7 @@ import { LightningElement, track } from 'lwc';
 import getCompaniesApex      from '@salesforce/apex/CostcoSchedulerController.getCompanies';
 import getAvailableSlotsApex from '@salesforce/apex/CostcoSchedulerController.getAvailableSlots';
 import createBookingApex     from '@salesforce/apex/CostcoSchedulerController.createBooking';
+import COSTCO_LOGO           from '@salesforce/resourceUrl/CostcoLogo';
 
 const MONTH_NAMES = ['January','February','March','April','May','June',
                      'July','August','September','October','November','December'];
@@ -17,6 +18,8 @@ const COMPANY_IDS = {
 };
 
 export default class CostcoScheduler extends LightningElement {
+
+    costcoLogoUrl = COSTCO_LOGO;
 
     // Screens: companies | booking | form | confirm
     @track currentScreen    = 'companies';
