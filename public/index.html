@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Costco Wholesale — Vendor Appointment Booking</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f5f5f5;
+      color: #1a1a1a;
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    .header {
+      background: #fff;
+      border-bottom: 1px solid #e8e8e8;
+      padding: 16px 32px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .header-logo { display: flex; align-items: center; }
+    .header-logo img { height: 44px; width: 44px; }
+    .header-title { font-size: 17px; font-weight: 600; color: #E31837; }
+    .header-sub   { font-size: 13px; color: #666; margin-left: 4px; }
+
+    /* ── Screens ── */
+    .screen { display: none; }
+    .screen.active { display: block; }
+
+    /* ── Company Select Screen ── */
+    .company-screen { max-width: 860px; margin: 48px auto; padding: 0 24px; }
+    .company-screen h1 { font-size: 26px; font-weight: 700; margin-bottom: 6px; }
+    .company-screen p  { color: #555; margin-bottom: 32px; font-size: 15px; }
+
+    .company-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 16px;
+    }
+    .company-card {
+      background: #fff;
+      border: 1.5px solid #e8e8e8;
+      border-radius: 12px;
+      padding: 24px;
+      cursor: pointer;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .company-card:hover {
+      border-color: #E31837;
+      box-shadow: 0 4px 16px rgba(227,24,55,0.12);
+    }
+    .company-icon {
+      width: 48px; height: 48px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 14px;
+    }
+    .company-icon svg { width: 24px; height: 24px; stroke: #fff; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .company-name    { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+    .company-service { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+    .company-tagline { font-size: 13px; color: #666; line-height: 1.45; }
+    .company-meta    { display: flex; align-items: center; gap: 16px; margin-top: 16px; padding-top: 14px; border-top: 1px solid #f0f0f0; }
+    .company-meta-item { display: flex; align-items: center; gap: 5px; font-size: 12px; color: #888; }
+    .company-meta-item svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+    /* ── Booking Screen ── */
+    .booking-screen { max-width: 900px; margin: 48px auto; padding: 0 24px; }
+    .back-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 13px; color: #555; cursor: pointer;
+      margin-bottom: 24px; background: none; border: none; padding: 0;
+    }
+    .back-btn:hover { color: #E31837; }
+    .back-btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+    .booking-card {
+      background: #fff;
+      border: 1px solid #e8e8e8;
+      border-radius: 16px;
+      display: flex;
+      overflow: hidden;
+      min-height: 520px;
+    }
+
+    /* Left panel */
+    .booking-left {
+      width: 280px; min-width: 280px;
+      padding: 32px 28px;
+      border-right: 1px solid #e8e8e8;
+    }
+    .booking-company-icon {
+      width: 52px; height: 52px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 16px;
+    }
+    .booking-company-icon svg { width: 26px; height: 26px; stroke: #fff; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .booking-company-name { font-size: 13px; color: #888; margin-bottom: 4px; }
+    .booking-title { font-size: 20px; font-weight: 700; margin-bottom: 18px; line-height: 1.3; }
+    .booking-detail { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #555; margin-bottom: 10px; }
+    .booking-detail svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+    .booking-description { font-size: 13px; color: #777; line-height: 1.55; margin-top: 20px; padding-top: 16px; border-top: 1px solid #f0f0f0; }
+
+    /* Right panel */
+    .booking-right {
+      flex: 1;
+      padding: 32px 28px;
+    }
+    .booking-right-title { font-size: 16px; font-weight: 600; margin-bottom: 20px; }
+
+    /* Calendar */
+    .calendar-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .calendar-nav-btn {
+      width: 32px; height: 32px; border-radius: 8px; border: 1px solid #e8e8e8;
+      background: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    }
+    .calendar-nav-btn:hover { background: #f5f5f5; }
+    .calendar-nav-btn svg { width: 14px; height: 14px; stroke: #555; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+    .calendar-month { font-size: 15px; font-weight: 600; }
+
+    .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+    .cal-header { text-align: center; font-size: 11px; font-weight: 600; color: #999; padding: 4px 0 8px; text-transform: uppercase; }
+    .cal-day {
+      text-align: center; padding: 8px 4px; border-radius: 8px;
+      font-size: 13px; cursor: pointer; position: relative;
+    }
+    .cal-day.other-month { color: #ccc; cursor: default; }
+    .cal-day.past        { color: #ccc; cursor: default; }
+    .cal-day.has-slots   { cursor: pointer; font-weight: 600; }
+    .cal-day.has-slots:hover { background: #FDECEA; }
+    .cal-day.selected    { background: #E31837 !important; color: #fff !important; }
+    .cal-day.today       { color: #E31837; }
+    .cal-day.loading-slots { color: #bbb; cursor: default; }
+
+    .slots-section { margin-top: 24px; }
+    .slots-section-title { font-size: 14px; font-weight: 600; margin-bottom: 12px; color: #333; }
+    .slots-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; max-height: 200px; overflow-y: auto; }
+    .slot-btn {
+      padding: 10px 8px; border: 1.5px solid #d0d8e8; border-radius: 8px;
+      background: #fff; font-size: 13px; font-weight: 500; cursor: pointer;
+      text-align: center; transition: all 0.12s;
+    }
+    .slot-btn:hover   { border-color: #E31837; color: #E31837; background: #FDECEA; }
+    .slot-btn.selected { background: #E31837; color: #fff; border-color: #E31837; }
+
+    .slots-loading, .slots-empty { font-size: 13px; color: #999; padding: 12px 0; }
+
+    /* ── Form Screen ── */
+    .form-screen { max-width: 900px; margin: 48px auto; padding: 0 24px; }
+    .form-card {
+      background: #fff;
+      border: 1px solid #e8e8e8;
+      border-radius: 16px;
+      display: flex;
+      overflow: hidden;
+      min-height: 520px;
+    }
+    .form-left {
+      width: 280px; min-width: 280px;
+      padding: 32px 28px;
+      border-right: 1px solid #e8e8e8;
+    }
+    .form-right { flex: 1; padding: 32px 32px; }
+    .form-right h2 { font-size: 17px; font-weight: 600; margin-bottom: 6px; }
+    .form-selected-time { font-size: 13px; color: #555; margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid #f0f0f0; }
+    .form-selected-time svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; vertical-align: middle; margin-right: 4px; }
+
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+    .form-group { display: flex; flex-direction: column; gap: 5px; margin-bottom: 14px; }
+    .form-group label { font-size: 12px; font-weight: 600; color: #444; }
+    .form-group input, .form-group textarea {
+      border: 1.5px solid #e0e0e0; border-radius: 8px;
+      padding: 10px 12px; font-size: 14px; font-family: inherit;
+      transition: border-color 0.12s;
+      outline: none;
+    }
+    .form-group input:focus, .form-group textarea:focus { border-color: #E31837; }
+    .form-group textarea { resize: vertical; min-height: 80px; }
+
+    .submit-btn {
+      width: 100%; padding: 13px;
+      background: #E31837; color: #fff;
+      border: none; border-radius: 10px;
+      font-size: 15px; font-weight: 600; cursor: pointer;
+      margin-top: 8px; transition: background 0.12s;
+    }
+    .submit-btn:hover    { background: #C0102A; }
+    .submit-btn:disabled { background: #f0a0ac; cursor: not-allowed; }
+
+    /* ── Confirmation Screen ── */
+    .confirm-screen {
+      max-width: 500px; margin: 80px auto; padding: 0 24px;
+      text-align: center;
+    }
+    .confirm-check {
+      width: 72px; height: 72px; background: #FDECEA;
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 24px;
+    }
+    .confirm-check svg { width: 36px; height: 36px; stroke: #E31837; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+    .confirm-screen h1 { font-size: 24px; font-weight: 700; margin-bottom: 10px; }
+    .confirm-screen p  { color: #555; font-size: 15px; line-height: 1.6; margin-bottom: 8px; }
+    .confirm-details {
+      background: #fff; border: 1px solid #e8e8e8; border-radius: 12px;
+      padding: 20px; margin: 24px 0; text-align: left;
+    }
+    .confirm-detail-row { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 12px; font-size: 13px; }
+    .confirm-detail-row:last-child { margin-bottom: 0; }
+    .confirm-detail-row svg { width: 15px; height: 15px; stroke: #E31837; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; margin-top: 1px; }
+    .confirm-detail-label { color: #888; }
+    .confirm-detail-value { font-weight: 600; }
+    .confirm-id { font-size: 12px; color: #aaa; margin-top: 4px; }
+
+    .new-booking-btn {
+      padding: 12px 28px; background: #E31837; color: #fff;
+      border: none; border-radius: 10px; font-size: 14px; font-weight: 600;
+      cursor: pointer; margin-top: 8px;
+    }
+    .new-booking-btn:hover { background: #C0102A; }
+
+    /* Error toast */
+    .toast {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+      background: #D32F2F; color: #fff; padding: 12px 20px;
+      border-radius: 10px; font-size: 14px; font-weight: 500;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.15); z-index: 999;
+      display: none;
+    }
+    .toast.show { display: block; }
+
+    .spinner {
+      display: inline-block; width: 16px; height: 16px;
+      border: 2px solid rgba(255,255,255,0.4); border-top-color: #fff;
+      border-radius: 50%; animation: spin 0.7s linear infinite;
+      vertical-align: middle; margin-right: 6px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media (max-width: 640px) {
+      .booking-card, .form-card { flex-direction: column; }
+      .booking-left, .form-left { width: 100%; border-right: none; border-bottom: 1px solid #e8e8e8; }
+      .slots-grid { grid-template-columns: repeat(2, 1fr); }
+      .form-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-logo">
+    <img src="/costco-logo.svg" alt="Costco" />
+  </div>
+  <span class="header-sub" style="margin-left:10px;">Vendor Appointment Booking</span>
+</header>
+
+<!-- Screen 1: Company Select -->
+<div id="screen-companies" class="screen active company-screen">
+  <h1>Book a Home Services Consultation</h1>
+  <p>Select a vendor to schedule a free in-home consultation in Gwinnett County, GA.</p>
+  <div class="company-grid" id="company-grid">
+    <div class="slots-loading">Loading vendors…</div>
+  </div>
+</div>
+
+<!-- Screen 2: Calendar + Time Slot -->
+<div id="screen-booking" class="screen booking-screen">
+  <button class="back-btn" onclick="showScreen('companies')">
+    <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+    All vendors
+  </button>
+  <div class="booking-card">
+    <div class="booking-left" id="booking-left-panel"></div>
+    <div class="booking-right">
+      <div class="booking-right-title">Select a Date &amp; Time</div>
+      <!-- Calendar -->
+      <div class="calendar-nav">
+        <button class="calendar-nav-btn" onclick="changeMonth(-1)"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
+        <span class="calendar-month" id="cal-month-label"></span>
+        <button class="calendar-nav-btn" onclick="changeMonth(1)"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
+      </div>
+      <div class="calendar-grid" id="calendar-grid"></div>
+      <!-- Time slots -->
+      <div class="slots-section" id="slots-section" style="display:none">
+        <div class="slots-section-title" id="slots-section-title"></div>
+        <div id="slots-container"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Screen 3: Booking Form -->
+<div id="screen-form" class="screen form-screen">
+  <button class="back-btn" onclick="showScreen('booking')">
+    <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+    Back to calendar
+  </button>
+  <div class="form-card">
+    <div class="form-left" id="form-left-panel"></div>
+    <div class="form-right">
+      <h2>Enter Your Details</h2>
+      <div class="form-selected-time" id="form-selected-time"></div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>First Name *</label>
+          <input type="text" id="inp-first" placeholder="Jane" required />
+        </div>
+        <div class="form-group">
+          <label>Last Name *</label>
+          <input type="text" id="inp-last" placeholder="Smith" required />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Email Address *</label>
+        <input type="email" id="inp-email" placeholder="jane@example.com" required />
+      </div>
+      <div class="form-group">
+        <label>Phone Number</label>
+        <input type="tel" id="inp-phone" placeholder="(555) 123-4567" />
+      </div>
+      <div class="form-group">
+        <label>Additional Notes</label>
+        <textarea id="inp-notes" placeholder="Any specific concerns or questions for the consultant…"></textarea>
+      </div>
+      <button class="submit-btn" id="submit-btn" onclick="submitBooking()">Confirm Appointment</button>
+    </div>
+  </div>
+</div>
+
+<!-- Screen 4: Confirmation -->
+<div id="screen-confirm" class="screen confirm-screen">
+  <div class="confirm-check">
+    <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+  </div>
+  <h1>Appointment Confirmed!</h1>
+  <p>Your consultation has been scheduled. A representative will reach out to confirm details.</p>
+  <div class="confirm-details" id="confirm-details"></div>
+  <div class="confirm-id" id="confirm-id"></div>
+  <button class="new-booking-btn" onclick="showScreen('companies')">Book Another Appointment</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── SVG icon helpers ──────────────────────────────────────────────────────────
+const ICONS = {
+  house:    '<svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>',
+  wind:     '<svg viewBox="0 0 24 24"><path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2"/></svg>',
+  layout:   '<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>',
+  umbrella: '<svg viewBox="0 0 24 24"><path d="M23 12a11.05 11.05 0 0 0-22 0zm-5 7a3 3 0 0 1-6 0v-7"/></svg>',
+  sun:      '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>',
+  truck:    '<svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>',
+  clock:    '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+  map:      '<svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>',
+  video:    '<svg viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>',
+  calendar: '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
+  user:     '<svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
+  check:    '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>',
+};
+
+// ── State ──────────────────────────────────────────────────────────────────────
+let companies = [];
+let selectedCompany = null;
+let calYear = new Date().getFullYear();
+let calMonth = new Date().getMonth();
+let slotsByDate = {};          // { 'YYYY-MM-DD': [{startTime, endTime}] }
+let loadedMonths = new Set();  // months already fetched
+let loadingMonths = new Set(); // months currently in-flight
+let selectedDate = null;
+let selectedSlot = null;
+
+// ── Boot ───────────────────────────────────────────────────────────────────────
+(async () => {
+  const res = await fetch('/api/companies');
+  companies = await res.json();
+  renderCompanyGrid();
+})();
+
+// ── Navigation ────────────────────────────────────────────────────────────────
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(`screen-${name}`).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+// ── Company Grid ──────────────────────────────────────────────────────────────
+function renderCompanyGrid() {
+  const grid = document.getElementById('company-grid');
+  grid.innerHTML = companies.map(c => `
+    <div class="company-card" onclick="selectCompany('${c.id}')">
+      <div class="company-icon" style="background:${c.color}">${ICONS[c.icon]}</div>
+      <div class="company-name">${c.name}</div>
+      <div class="company-service" style="color:${c.color}">${c.service}</div>
+      <div class="company-tagline">${c.tagline}</div>
+      <div class="company-meta">
+        <div class="company-meta-item">${ICONS.clock} 60 min</div>
+        <div class="company-meta-item">${ICONS.map} In-Person</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ── Company Select ────────────────────────────────────────────────────────────
+function selectCompany(id) {
+  selectedCompany = companies.find(c => c.id === id);
+  selectedDate = null;
+  selectedSlot = null;
+  slotsByDate = {};
+  loadedMonths = new Set();
+  loadingMonths = new Set();
+  calYear = new Date().getFullYear();
+  calMonth = new Date().getMonth();
+
+  renderBookingLeftPanel('booking-left-panel');
+  showScreen('booking');
+  document.getElementById('slots-section').style.display = 'none';
+  renderCalendar();             // render instantly, then load slots in background
+  fetchSlotsForMonth(calYear, calMonth);
+}
+
+function companyLeftPanelHTML(containerId) {
+  const c = selectedCompany;
+  return `
+    <div class="booking-company-icon" style="background:${c.color}">${ICONS[c.icon]}</div>
+    <div class="booking-company-name">${c.name}</div>
+    <div class="booking-title">${c.service} Consultation</div>
+    <div class="booking-detail">${ICONS.clock} 60 minutes</div>
+    <div class="booking-detail">${ICONS.map} In-Person · Gwinnett County, GA</div>
+    <div class="booking-description">
+      Meet with a ${c.name} specialist at your home to discuss your ${c.service.toLowerCase()} 
+      needs, get expert recommendations, and receive a free quote.
+    </div>
+  `;
+}
+
+function renderBookingLeftPanel(containerId) {
+  document.getElementById(containerId).innerHTML = companyLeftPanelHTML(containerId);
+}
+
+// ── Calendar ──────────────────────────────────────────────────────────────────
+const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const DAY_NAMES   = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
+
+function changeMonth(delta) {
+  calMonth += delta;
+  if (calMonth > 11) { calMonth = 0; calYear++; }
+  if (calMonth < 0)  { calMonth = 11; calYear--; }
+  selectedDate = null;
+  selectedSlot = null;
+  document.getElementById('slots-section').style.display = 'none';
+  renderCalendar();                              // render instantly
+  fetchSlotsForMonth(calYear, calMonth);         // load slots in background
+}
+
+async function fetchSlotsForMonth(year, month) {
+  const key = `${year}-${String(month + 1).padStart(2, '0')}`;
+  if (loadedMonths.has(key) || loadingMonths.has(key)) return;
+  loadingMonths.add(key);
+
+  const startDate = new Date(year, month, 1, 0, 0, 0);
+  const endDate   = new Date(year, month + 1, 0, 23, 59, 59);
+  const today     = new Date(); today.setHours(0, 0, 0, 0);
+  if (startDate < today) startDate.setTime(today.getTime());
+
+  try {
+    const res  = await fetch('/api/slots', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        companyId: selectedCompany.id,
+        startDate: startDate.toISOString(),
+        endDate:   endDate.toISOString(),
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      showToast(data.error || data.message || 'Failed to load available times');
+      return;
+    }
+
+    const slots = data.timeSlots || [];
+    slots.forEach(slot => {
+      // Convert UTC time to local date string so day boundaries match the calendar
+      const localDate = new Date(slot.startTime).toLocaleDateString('en-CA'); // YYYY-MM-DD in local tz
+      if (!slotsByDate[localDate]) slotsByDate[localDate] = [];
+      slotsByDate[localDate].push(slot);
+    });
+
+    loadedMonths.add(key);
+
+    // Re-render calendar and open slot list if this month is still visible
+    if (year === calYear && month === calMonth) {
+      renderCalendar();
+      if (selectedDate && slotsByDate[selectedDate]) openSlotList(selectedDate);
+    }
+  } catch (e) {
+    showToast('Could not load available times: ' + e.message);
+  } finally {
+    loadingMonths.delete(key);
+  }
+}
+
+function renderCalendar() {
+  const monthKey     = `${calYear}-${String(calMonth + 1).padStart(2, '0')}`;
+  const isLoading    = loadingMonths.has(monthKey);
+  const loadingLabel = isLoading ? ' <span style="font-size:11px;color:#aaa;">Loading…</span>' : '';
+  document.getElementById('cal-month-label').innerHTML =
+    `${MONTH_NAMES[calMonth]} ${calYear}${loadingLabel}`;
+
+  const grid        = document.getElementById('calendar-grid');
+  const today       = new Date(); today.setHours(0, 0, 0, 0);
+  const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+  const firstDay    = new Date(calYear, calMonth, 1).getDay();
+
+  let html = DAY_NAMES.map(d => `<div class="cal-header">${d}</div>`).join('');
+
+  for (let i = 0; i < firstDay; i++) {
+    const prevD = new Date(calYear, calMonth, -firstDay + i + 1);
+    html += `<div class="cal-day other-month">${prevD.getDate()}</div>`;
+  }
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const date     = new Date(calYear, calMonth, d);
+    const key      = date.toLocaleDateString('en-CA'); // YYYY-MM-DD in local tz
+    const isPast   = date < today;
+    const isToday  = date.getTime() === today.getTime();
+    const hasSlots = !isPast && !!slotsByDate[key] && slotsByDate[key].length > 0;
+    const isSelected = selectedDate === key;
+
+    let cls = 'cal-day';
+    if (isPast)     cls += ' past';
+    if (isToday)    cls += ' today';
+    if (hasSlots)   cls += ' has-slots';
+    if (isSelected) cls += ' selected';
+
+    const style = hasSlots && !isSelected ? `color:${selectedCompany.color}` : '';
+    const click = hasSlots ? `onclick="selectDate('${key}')"` : '';
+    html += `<div class="${cls}" style="${style}" ${click}>${d}</div>`;
+  }
+
+  const lastDay = new Date(calYear, calMonth, daysInMonth).getDay();
+  for (let i = lastDay + 1; i < 7; i++) {
+    html += `<div class="cal-day other-month">${i - lastDay}</div>`;
+  }
+
+  grid.innerHTML = html;
+}
+
+function selectDate(key) {
+  selectedDate = key;
+  selectedSlot = null;
+  renderCalendar();
+  openSlotList(key);
+}
+
+function openSlotList(key) {
+  const slots   = slotsByDate[key] || [];
+  const [y, m, d] = key.split('-').map(Number);
+  const label   = new Date(y, m - 1, d).toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric' });
+
+  document.getElementById('slots-section-title').textContent = label;
+  document.getElementById('slots-section').style.display = 'block';
+
+  const container = document.getElementById('slots-container');
+  if (!slots.length) {
+    container.innerHTML = '<div class="slots-empty">No available times for this day.</div>';
+    return;
+  }
+
+  container.innerHTML = `<div class="slots-grid">${
+    slots.map((s, i) => {
+      const t = formatTime(s.startTime);
+      return `<button class="slot-btn" id="slot-${i}" onclick="selectSlot(${i})">${t}</button>`;
+    }).join('')
+  }</div>`;
+}
+
+function selectSlot(index) {
+  selectedSlot = slotsByDate[selectedDate][index];
+  document.querySelectorAll('.slot-btn').forEach(b => b.classList.remove('selected'));
+  document.getElementById(`slot-${index}`).classList.add('selected');
+
+  // Brief delay so user sees selection, then advance
+  setTimeout(() => {
+    renderFormScreen();
+    showScreen('form');
+  }, 180);
+}
+
+// ── Form Screen ────────────────────────────────────────────────────────────────
+function renderFormScreen() {
+  document.getElementById('form-left-panel').innerHTML = companyLeftPanelHTML('form-left-panel');
+
+  const start = new Date(selectedSlot.startTime);
+  const end   = new Date(selectedSlot.endTime);
+  document.getElementById('form-selected-time').innerHTML = `
+    ${ICONS.calendar} 
+    <strong>${start.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' })}</strong>
+    &nbsp;·&nbsp; ${formatTime(selectedSlot.startTime)} – ${formatTime(selectedSlot.endTime)}
+  `;
+
+  // Clear previous inputs
+  ['inp-first','inp-last','inp-email','inp-phone','inp-notes'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = false;
+  btn.innerHTML = 'Confirm Appointment';
+}
+
+// ── Booking Submit ────────────────────────────────────────────────────────────
+async function submitBooking() {
+  const firstName = document.getElementById('inp-first').value.trim();
+  const lastName  = document.getElementById('inp-last').value.trim();
+  const email     = document.getElementById('inp-email').value.trim();
+  const phone     = document.getElementById('inp-phone').value.trim();
+  const notes     = document.getElementById('inp-notes').value.trim();
+
+  if (!firstName || !lastName || !email) {
+    showToast('Please fill in your first name, last name, and email.');
+    return;
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    showToast('Please enter a valid email address.');
+    return;
+  }
+
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Booking…';
+
+  try {
+    const res = await fetch('/api/book', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        companyId: selectedCompany.id,
+        startTime: selectedSlot.startTime,
+        endTime:   selectedSlot.endTime,
+        firstName, lastName, email, phone, notes,
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      const msg = data.error || data.message || 'Booking failed. Please try again.';
+      showToast(msg);
+      console.error('Booking error details:', data.details || data);
+      btn.disabled = false;
+      btn.innerHTML = 'Confirm Appointment';
+      return;
+    }
+    renderConfirmation(data, firstName, lastName, email);
+    showScreen('confirm');
+  } catch (e) {
+    showToast('Network error: ' + e.message);
+    btn.disabled = false;
+    btn.innerHTML = 'Confirm Appointment';
+  }
+}
+
+// ── Confirmation ──────────────────────────────────────────────────────────────
+function renderConfirmation(data, firstName, lastName, email) {
+  const start = new Date(selectedSlot.startTime);
+  const end   = new Date(selectedSlot.endTime);
+
+  document.getElementById('confirm-details').innerHTML = `
+    <div class="confirm-detail-row">
+      ${ICONS.house}
+      <div><div class="confirm-detail-label">Vendor</div><div class="confirm-detail-value">${selectedCompany.name}</div></div>
+    </div>
+    <div class="confirm-detail-row">
+      ${ICONS.clock}
+      <div><div class="confirm-detail-label">Service</div><div class="confirm-detail-value">${selectedCompany.service} Consultation · 60 min</div></div>
+    </div>
+    <div class="confirm-detail-row">
+      ${ICONS.calendar}
+      <div><div class="confirm-detail-label">Date &amp; Time</div>
+      <div class="confirm-detail-value">${start.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'})}<br>${formatTime(selectedSlot.startTime)} – ${formatTime(selectedSlot.endTime)}</div></div>
+    </div>
+    <div class="confirm-detail-row">
+      ${ICONS.map}
+      <div><div class="confirm-detail-label">Location</div><div class="confirm-detail-value">Gwinnett County, GA (In-Person)</div></div>
+    </div>
+    <div class="confirm-detail-row">
+      ${ICONS.user}
+      <div><div class="confirm-detail-label">Customer</div><div class="confirm-detail-value">${firstName} ${lastName} · ${email}</div></div>
+    </div>
+  `;
+
+  const apptId = data.serviceAppointmentId || data.id || '';
+  document.getElementById('confirm-id').textContent = apptId ? `Service Appointment ID: ${apptId}` : '';
+}
+
+// ── Utilities ─────────────────────────────────────────────────────────────────
+function formatTime(iso) {
+  const d = new Date(iso);
+  return d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 4000);
+}
+</script>
+</body>
+</html>

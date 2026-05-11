@@ -1,0 +1,49 @@
+<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+  <!-- Outer blue ring -->
+  <circle cx="60" cy="60" r="59" fill="#005DAA"/>
+  <circle cx="60" cy="60" r="54" fill="#ffffff"/>
+
+  <!-- COSTCO wordmark in red -->
+  <text x="60" y="62"
+        text-anchor="middle"
+        font-family="Impact, 'Arial Black', Arial, sans-serif"
+        font-weight="900"
+        font-style="italic"
+        font-size="30"
+        fill="#E31837"
+        letter-spacing="-0.5">COSTCO</text>
+  <text x="92" y="52"
+        text-anchor="middle"
+        font-family="Arial, sans-serif"
+        font-weight="700"
+        font-size="6"
+        fill="#E31837">®</text>
+
+  <!-- Three full-width blue stripes -->
+  <rect x="7"  y="66" width="106" height="3.2" fill="#005DAA"/>
+  <rect x="7"  y="72" width="106" height="3.2" fill="#005DAA"/>
+  <rect x="7"  y="78" width="106" height="3.2" fill="#005DAA"/>
+
+  <!-- White cutout behind WHOLESALE text -->
+  <rect x="24" y="65" width="72" height="17.4" fill="#ffffff"/>
+
+  <!-- WHOLESALE text in blue over stripes -->
+  <text x="60" y="79"
+        text-anchor="middle"
+        font-family="Arial, sans-serif"
+        font-weight="700"
+        font-style="italic"
+        font-size="11.5"
+        fill="#005DAA"
+        letter-spacing="1.2">WHOLESALE</text>
+
+  <!-- Restore stripe segments left of WHOLESALE -->
+  <rect x="7"  y="66" width="17" height="3.2" fill="#005DAA"/>
+  <rect x="7"  y="72" width="17" height="3.2" fill="#005DAA"/>
+  <rect x="7"  y="78" width="17" height="3.2" fill="#005DAA"/>
+
+  <!-- Restore stripe segments right of WHOLESALE -->
+  <rect x="96" y="66" width="17" height="3.2" fill="#005DAA"/>
+  <rect x="96" y="72" width="17" height="3.2" fill="#005DAA"/>
+  <rect x="96" y="78" width="17" height="3.2" fill="#005DAA"/>
+</svg>
