@@ -1,4 +1,7 @@
-public with sharing class CostcoSchedulerController {
+// without sharing is required so guest/anonymous Experience Cloud users can invoke
+// these methods. All data access goes through HTTP callouts (Named Credential) so
+// no Salesforce object sharing rules are relevant here.
+public without sharing class CostcoSchedulerController {
 
     private static final String TERRITORY_ID  = '0HhHu000001TK26KAG';
     private static final String API_VERSION   = 'v63.0';
@@ -47,7 +50,7 @@ public with sharing class CostcoSchedulerController {
         }
     };
 
-    @AuraEnabled(cacheable=true)
+    @AuraEnabled(cacheable=false)
     public static List<Map<String, String>> getCompanies() {
         List<Map<String, String>> result = new List<Map<String, String>>();
         for (Map<String, String> c : COMPANY_DATA) {
