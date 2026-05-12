@@ -1,14 +1,11 @@
-// without sharing is required so guest/anonymous Experience Cloud users can invoke
-// these methods. All data access goes through HTTP callouts (Named Credential) so
-// no Salesforce object sharing rules are relevant here.
 public without sharing class CostcoSchedulerController {
 
     private static final String TERRITORY_ID  = '0HhHu000001TK26KAG';
     private static final String API_VERSION   = 'v63.0';
     private static final String BASE_URL      = 'https://mjk-260320.my.salesforce.com';
-    // Named Credential label (used for guest/anonymous Experience Cloud access).
-    // Set to null to fall back to UserInfo.getSessionId() for authenticated users.
-    private static final String NAMED_CRED   = 'CostcoSchedulerNC';
+
+    // Per-transaction token cache (populated from SchedulerCredential__mdt)
+    private static String cachedToken;
 
     // ── Company definitions ──────────────────────────────────────────────────
     private static final List<Map<String, String>> COMPANY_DATA = new List<Map<String, String>>{
@@ -83,11 +80,10 @@ public without sharing class CostcoSchedulerController {
                 JSON.serialize(payload)
             );
 
-            if (res.getStatusCode() != 200) {
-                throw new AuraHandledException('Slots API error: ' + res.getBody());
+            if (res.getStatusCode() != 200 && res.getStatusCode() != 201) {
+                throw new AuraHandledException('Slots API error ' + res.getStatusCode() + ': ' + res.getBody());
             }
 
-            // Parse and normalize: keep only top-of-hour slots
             Map<String, Object> body = (Map<String, Object>) JSON.deserializeUntyped(res.getBody());
             Object rootObj = body.containsKey('result') ? body.get('result') : body;
             Map<String, Object> root = (Map<String, Object>) rootObj;
@@ -103,7 +99,6 @@ public without sharing class CostcoSchedulerController {
                     for (Object slotObj : rawSlots) {
                         Map<String, Object> slot = (Map<String, Object>) slotObj;
                         String startTime = (String) slot.get('startTime');
-                        // Top-of-hour filter: check minutes == 00
                         if (startTime != null && startTime.contains('T') && !seen.contains(startTime)) {
                             String timePart = startTime.substringAfter('T');
                             String minutes  = timePart.substring(3, 5);
@@ -120,8 +115,11 @@ public without sharing class CostcoSchedulerController {
             }
 
             return JSON.serialize(new Map<String, Object>{ 'timeSlots' => timeSlots });
+        } catch (AuraHandledException e) {
+            throw e;
         } catch (Exception e) {
-            throw new AuraHandledException(e.getMessage());
+            String msg = e.getMessage();
+            throw new AuraHandledException(String.isBlank(msg) ? e.getTypeName() : msg);
         }
     }
 
@@ -170,14 +168,13 @@ public without sharing class CostcoSchedulerController {
             );
 
             if (res.getStatusCode() != 200 && res.getStatusCode() != 201) {
-                throw new AuraHandledException('Booking API error: ' + res.getBody());
+                throw new AuraHandledException('Booking API error ' + res.getStatusCode() + ': ' + res.getBody());
             }
 
             Map<String, Object> body   = (Map<String, Object>) JSON.deserializeUntyped(res.getBody());
             Object rootObj = body.containsKey('result') ? body.get('result') : body;
             Map<String, Object> result = (Map<String, Object>) rootObj;
 
-            // Send confirmation email
             try {
                 sendConfirmationEmail(email, firstName, companyName, serviceName, schedStartTime);
             } catch (Exception emailEx) {
@@ -195,19 +192,28 @@ public without sharing class CostcoSchedulerController {
         }
     }
 
-    // ── Helpers ──────────────────────────────────────────────────────────────
+    // ── Token + callout helpers ───────────────────────────────────────────────
+
+    private static String getAccessToken() {
+        if (cachedToken != null) {
+            return cachedToken;
+        }
+        List<SchedulerCredential__mdt> creds = [
+            SELECT AccessToken__c FROM SchedulerCredential__mdt
+            WHERE DeveloperName = 'Default' LIMIT 1
+        ];
+        if (creds.isEmpty() || String.isBlank(creds[0].AccessToken__c)) {
+            throw new AuraHandledException('Scheduler credential not configured. Run the token refresh script.');
+        }
+        cachedToken = creds[0].AccessToken__c;
+        return cachedToken;
+    }
+
     private static HttpResponse sfCallout(String method, String path, String body) {
         HttpRequest req = new HttpRequest();
-        // Use Named Credential when available (supports guest/anonymous Experience Cloud users).
-        // Falls back to session ID for authenticated internal users.
-        Boolean useNC = String.isNotBlank(NAMED_CRED);
-        if (useNC) {
-            req.setEndpoint('callout:' + NAMED_CRED + path);
-        } else {
-            req.setEndpoint(BASE_URL + path);
-            req.setHeader('Authorization', 'Bearer ' + UserInfo.getSessionId());
-        }
+        req.setEndpoint(BASE_URL + path);
         req.setMethod(method);
+        req.setHeader('Authorization', 'Bearer ' + getAccessToken());
         req.setHeader('Content-Type', 'application/json');
         req.setHeader('Accept', 'application/json');
         if (String.isNotBlank(body)) req.setBody(body);
@@ -219,7 +225,6 @@ public without sharing class CostcoSchedulerController {
         String toEmail, String firstName, String companyName,
         String serviceName, String schedStartTime
     ) {
-        String apptDisplay = schedStartTime;
         Messaging.SingleEmailMessage mail = new Messaging.SingleEmailMessage();
         mail.setToAddresses(new List<String>{ toEmail });
         mail.setSubject('Your ' + serviceName + ' Consultation is Confirmed');
@@ -228,7 +233,7 @@ public without sharing class CostcoSchedulerController {
             'Your appointment has been confirmed!\n\n' +
             '  Vendor:    ' + companyName + '\n' +
             '  Service:   ' + serviceName + ' Consultation\n' +
-            '  Time:      ' + apptDisplay + '\n' +
+            '  Time:      ' + schedStartTime + '\n' +
             '  Location:  In-Person · Gwinnett County, GA\n' +
             '  Duration:  60 minutes\n\n' +
             'A specialist will reach out to confirm your address and details.\n\n' +

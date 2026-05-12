@@ -305,7 +305,9 @@ export default class CostcoScheduler extends LightningElement {
             this.slotsByDate = updated;
             this._loadedMonths.add(key);
         } catch (e) {
-            console.error('[costcoScheduler] slot fetch error:', e);
+            const msg = this._errMsg(e);
+            console.error('[costcoScheduler] slot fetch error:', msg);
+            this._showError('Slot load error: ' + msg);
         } finally {
             this._loadingMonths.delete(key);
             this.loadingSlots = this._loadingMonths.size > 0;
