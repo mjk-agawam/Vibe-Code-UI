@@ -4,14 +4,15 @@
     <description>Integration user for Costco Scheduler LWC — JWT-based API access for Experience Cloud guest users via Connie Ruiz (SDO-Scheduler-Admin)</description>
     <label>Costco Scheduler Integration</label>
     <oauthConfig>
-        <callbackUrl>https://login.salesforce.com/services/oauth2/callback</callbackUrl>
-        <certificate>MIIDuTCCAqGgAwIBAgIURgryZJ9HgPAjKOXAq4weT7nRI30wDQYJKoZIhvcNAQELBQAwbDELMAkGA1UEBhMCVVMxCzAJBgNVBAgMAkdBMREwDwYDVQQHDAhHd2lubmV0dDEYMBYGA1UECgwPQ29zdGNvU2NoZWR1bGVyMSMwIQYDVQQDDBpDb3N0Y29TY2hlZHVsZXJJbnRlZ3JhdGlvbjAeFw0yNjA1MTEyMjQ5MDBaFw0yODA1MTAyMjQ5MDBaMGwxCzAJBgNVBAYTAlVTMQswCQYDVQQIDAJHQTERMA8GA1UEBwwIR3dpbm5ldHQxGDAWBgNVBAoMD0Nvc3Rjb1NjaGVkdWxlcjEjMCEGA1UEAwwaQ29zdGNvU2NoZWR1bGVySW50ZWdyYXRpb24wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDSZdiNiTEuUEbYruj1dbr6+imWKEf+PA6LAOlF+vgTtrg/g/bwU3VESyiLwYpP+c0Q9UrUkOaB5LuAFDYgsCBwKaRgng/C4F2i+OUb+snr46DdrEvHHUoEgZaFFpnVWSPIzKBkvtKZI8PtJOEKiPPSOyEmcWFDz7/sNewOxRcotyt1EoQb0Maq+m5E7AsAAW9/lZ5VdY80Z/L9IKA5bppySd8Iuul8w1+KWUNqeogyXF0k7mq54+gnQ+qNRILSRWnTdtbx3ybwK5oF/JqzdS79B7CCGGUrI3Rd0ir3ky8fYjRG/VWZtkzLx9Sz/tge9lX9VMPjRZ/TzjjQAJ6IzeNJAgMBAAGjUzBRMB0GA1UdDgQWBBQaLLgtcSOcA0YEycQph0ba+OPr4DAfBgNVHSMEGDAWgBQaLLgtcSOcA0YEycQph0ba+OPr4DAPBgNVHRMBAf8EBTADAQH/MA0GCSqGSIb3DQEBCwUAA4IBAQCOLsa4SiRgKApJbbAeoS+f84Ee6Vfcl1/nhEB2aUiTnKK2cCUZ4qPcb83alc9P9um0H/J/VhTgz5Zf5fhsniXL5gE5b6M6JjVPUPfVMYwsIq6lHfy67jZufeZR4Zb07K2vJIml2kBVNjcai66ZF+LZRdFLdWeDvYc1yqSocaSvMyij5ZybLpiDP2cnCjMX+8Gozf5XrbFXVILWNYVe7mKe+ySNT0lYs/o1ohNFLtxmA+6K7hGvysAP9rGBu4WMukzX9kCKPbMB2a5LvlyXeldGnwBOeHYktSZUICxsRVceadidoGZ+ICtTQPo3x0YBAPHa8o6Q9dl8nR19gLQWv997</certificate>
+        <callbackUrl>https://login.salesforce.com/services/oauth2/callback
+http://localhost:1717/callback</callbackUrl>
+        <certificate>MIIEwjCCA6qgAwIBAgIOAZ4ZPn4tAAAAAEUo9AUwDQYJKoZIhvcNAQELBQAwgYoxIzAhBgNVBAMMGkNvc3Rjb1NjaGVkdWxlckludGVncmF0aW9uMRgwFgYDVQQLDA8wMERIdTAwMDAweXVNeDMxFzAVBgNVBAoMDlNhbGVzZm9yY2UuY29tMRYwFAYDVQQHDA1TYW4gRnJhbmNpc2NvMQswCQYDVQQIDAJDQTELMAkGA1UEBhMCVVMwHhcNMjYwNTExMjI1MzA2WhcNMjcwNTExMTIwMDAwWjCBijEjMCEGA1UEAwwaQ29zdGNvU2NoZWR1bGVySW50ZWdyYXRpb24xGDAWBgNVBAsMDzAwREh1MDAwMDB5dU14MzEXMBUGA1UECgwOU2FsZXNmb3JjZS5jb20xFjAUBgNVBAcMDVNhbiBGcmFuY2lzY28xCzAJBgNVBAgMAkNBMQswCQYDVQQGEwJVUzCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBANCVGn1/bGzz7KkIuMlqwKszoKPrcf3vZffKeI1Et/yVQ5Tnjk9vhb0ek7gQ0KgQExiy+N7q/FgSNjMtokQIxO5ySXzG0LfzK7aBTjXckdHp7K7197FhZgqF7YHcbrnsCV8GrP5izqDqPLtUcivooZ4L1hE/yiA10bkWBi9jd0EuL/AzYa7fEDBoIGqtfmvM4tj/FYWKUP3G3bXm7ln/vQrcjhVHyHcm31+KojhaMlVzqfbuFIFC3q8vFzhX9BSxPo3G/LKdHS1HL5rSwHDzwE14FBNR3V7Wz++HuMPnZ8ZeWk3kwOOQigtkiJSuSTaJTn0F9H3yDQwfw64Q++5skjkCAwEAAaOCASIwggEeMB0GA1UdDgQWBBSN8mYAILjrV9dtmLE/MeO+OFfgJDAlBgNVHREEHjAcghpDb3N0Y29TY2hlZHVsZXJJbnRlZ3JhdGlvbjAPBgNVHRMBAf8EBTADAQH/MIHEBgNVHSMEgbwwgbmAFI3yZgAguOtX122YsT8x4744V+AkoYGQpIGNMIGKMSMwIQYDVQQDDBpDb3N0Y29TY2hlZHVsZXJJbnRlZ3JhdGlvbjEYMBYGA1UECwwPMDBESHUwMDAwMHl1TXgzMRcwFQYDVQQKDA5TYWxlc2ZvcmNlLmNvbTEWMBQGA1UEBwwNU2FuIEZyYW5jaXNjbzELMAkGA1UECAwCQ0ExCzAJBgNVBAYTAlVTgg4Bnhk+fi0AAAAARSj0BTANBgkqhkiG9w0BAQsFAAOCAQEAN+idmwBXerjVE/dMW1NGANhpahplmNepbx1z4Vi9745PcOguZ5pKx/IsUgd1pTQbuSmyIRg2VSbUGK/ssaCa6fYm8Q7zj8qqSZxeurMrGxveNtM8/ch839zo5ZkvuChI168063d8ddBl004UCmtwaLUfEFPaPsHZYb7XcHkdtKM7xmUKMR07fTeWpjX/MbsYYqR+g2ortKm7sYk7AtFVeCG1KGr0/0DjOezDXRn5ezO4Gztc20to/7kHVxch6UDsjAl6KsMRqlZ1qu0f/Ot/2YeVeRg0R+aaCm5UsIJI7axTbqMv0bD9DlOERp6KciboqAqs0S2Kc9a52L1Eafcl3A==</certificate>
         <consumerKey>3MVG9VTfpJmxg1ygE7r2J5kLLWHeHSbWTaCCaqiNLyayN_E7ewr_YNOHH1Tza2tS78AkOQ1j8bcWb_jAL6lyf</consumerKey>
-        <isAdminApproved>true</isAdminApproved>
+        <isAdminApproved>false</isAdminApproved>
         <isClientCredentialEnabled>false</isClientCredentialEnabled>
         <isCodeCredentialEnabled>false</isCodeCredentialEnabled>
         <isCodeCredentialPostOnly>false</isCodeCredentialPostOnly>
-        <isConsumerSecretOptional>false</isConsumerSecretOptional>
+        <isConsumerSecretOptional>true</isConsumerSecretOptional>
         <isIntrospectAllTokens>false</isIntrospectAllTokens>
         <isNamedUserJwtEnabled>true</isNamedUserJwtEnabled>
         <isPkceRequired>false</isPkceRequired>
@@ -27,8 +28,4 @@
         <isTokenExchangeFlowEnabled>false</isTokenExchangeFlowEnabled>
         <refreshTokenPolicy>infinite</refreshTokenPolicy>
     </oauthPolicy>
-    <profileName>SDO-Scheduler-Admin</profileName>
-    <profileName>System Administrator</profileName>
-    <profileName>Standard User</profileName>
-    <profileName>SDO-Scheduler-User</profileName>
 </ConnectedApp>

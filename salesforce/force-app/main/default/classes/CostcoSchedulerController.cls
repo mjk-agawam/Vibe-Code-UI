@@ -4,7 +4,13 @@ public without sharing class CostcoSchedulerController {
     private static final String API_VERSION   = 'v63.0';
     private static final String BASE_URL      = 'https://mjk-260320.my.salesforce.com';
 
-    // Per-transaction token cache (populated from SchedulerCredential__mdt)
+    // JWT Bearer Flow constants — generates a fresh token on every transaction (never expires)
+    private static final String CONSUMER_KEY  = '3MVG9VTfpJmxg1ygE7r2J5kLLWHeHSbWTaCCaqiNLyayN_E7ewr_YNOHH1Tza2tS78AkOQ1j8bcWb_jAL6lyf';
+    private static final String JWT_SUBJECT   = 'admin@mjk-260320.scheduler';
+    private static final String CERT_NAME     = 'CostcoSchedulerIntegration';
+    private static final String TOKEN_EP      = 'https://login.salesforce.com/services/oauth2/token';
+
+    // Per-transaction token cache
     private static String cachedToken;
 
     // ── Company definitions ──────────────────────────────────────────────────
@@ -198,14 +204,33 @@ public without sharing class CostcoSchedulerController {
         if (cachedToken != null) {
             return cachedToken;
         }
-        List<SchedulerCredential__mdt> creds = [
-            SELECT AccessToken__c FROM SchedulerCredential__mdt
-            WHERE DeveloperName = 'Default' LIMIT 1
-        ];
-        if (creds.isEmpty() || String.isBlank(creds[0].AccessToken__c)) {
-            throw new AuraHandledException('Scheduler credential not configured. Run the token refresh script.');
+
+        Auth.JWT jwt = new Auth.JWT();
+        jwt.setIss(CONSUMER_KEY);
+        jwt.setSub(JWT_SUBJECT);
+        jwt.setAud('https://login.salesforce.com');
+        jwt.setValidityLength(300);
+
+        Auth.JWS jws = new Auth.JWS(jwt, CERT_NAME);
+        String signedJwt = jws.getCompactSerialization();
+
+        HttpRequest req = new HttpRequest();
+        req.setEndpoint(TOKEN_EP);
+        req.setMethod('POST');
+        req.setHeader('Content-Type', 'application/x-www-form-urlencoded');
+        req.setBody(
+            'grant_type=' + EncodingUtil.urlEncode('urn:ietf:params:oauth:grant-type:jwt-bearer', 'UTF-8') +
+            '&assertion=' + EncodingUtil.urlEncode(signedJwt, 'UTF-8')
+        );
+        req.setTimeout(30000);
+
+        HttpResponse res = new Http().send(req);
+        if (res.getStatusCode() != 200) {
+            throw new AuraHandledException('JWT token exchange failed (' + res.getStatusCode() + '): ' + res.getBody());
         }
-        cachedToken = creds[0].AccessToken__c;
+
+        Map<String, Object> tokenResponse = (Map<String, Object>) JSON.deserializeUntyped(res.getBody());
+        cachedToken = (String) tokenResponse.get('access_token');
         return cachedToken;
     }
 
