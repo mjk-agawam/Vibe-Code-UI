@@ -250,20 +250,65 @@ public without sharing class CostcoSchedulerController {
         String toEmail, String firstName, String companyName,
         String serviceName, String schedStartTime
     ) {
+        // Format the appointment time for display
+        String displayTime = schedStartTime;
+        try {
+            DateTime dt = DateTime.valueOfGmt(schedStartTime.replace('T', ' ').replace('Z', ''));
+            displayTime = dt.format('MMMM d, yyyy \'at\' h:mm a z', 'America/New_York');
+        } catch (Exception ignored) {}
+
         Messaging.SingleEmailMessage mail = new Messaging.SingleEmailMessage();
         mail.setToAddresses(new List<String>{ toEmail });
-        mail.setSubject('Your ' + serviceName + ' Consultation is Confirmed');
+        mail.setSubject('Your ' + serviceName + ' Consultation is Confirmed — Costco Home Services');
+        mail.setSaveAsActivity(false);
+        mail.setSenderDisplayName('Costco Home Services');
+
         mail.setPlainTextBody(
             'Hi ' + firstName + ',\n\n' +
-            'Your appointment has been confirmed!\n\n' +
+            'Great news — your appointment has been confirmed!\n\n' +
             '  Vendor:    ' + companyName + '\n' +
             '  Service:   ' + serviceName + ' Consultation\n' +
-            '  Time:      ' + schedStartTime + '\n' +
-            '  Location:  In-Person · Gwinnett County, GA\n' +
+            '  When:      ' + displayTime + '\n' +
+            '  Where:     In-Person · Gwinnett County, GA\n' +
             '  Duration:  60 minutes\n\n' +
-            'A specialist will reach out to confirm your address and details.\n\n' +
-            'Thank you for choosing Costco Home Services!'
+            'A specialist will reach out shortly to confirm your address and any additional details.\n\n' +
+            'Thank you for choosing Costco Home Services!\n\n' +
+            '— The Costco Home Services Team'
         );
-        Messaging.sendEmail(new List<Messaging.SingleEmailMessage>{ mail });
+
+        mail.setHtmlBody(
+            '<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;">' +
+            '<div style="background:#005DAA;padding:20px;text-align:center;">' +
+            '<h1 style="color:#fff;margin:0;font-size:22px;">Costco Home Services</h1>' +
+            '</div>' +
+            '<div style="padding:30px;background:#f9f9f9;">' +
+            '<h2 style="color:#005DAA;">Your Appointment is Confirmed!</h2>' +
+            '<p>Hi ' + firstName + ',</p>' +
+            '<p>Great news — your consultation appointment has been confirmed.</p>' +
+            '<table style="width:100%;border-collapse:collapse;margin:20px 0;">' +
+            '<tr><td style="padding:10px;border-bottom:1px solid #ddd;color:#666;width:120px;"><strong>Vendor</strong></td><td style="padding:10px;border-bottom:1px solid #ddd;">' + companyName + '</td></tr>' +
+            '<tr><td style="padding:10px;border-bottom:1px solid #ddd;color:#666;"><strong>Service</strong></td><td style="padding:10px;border-bottom:1px solid #ddd;">' + serviceName + ' Consultation</td></tr>' +
+            '<tr><td style="padding:10px;border-bottom:1px solid #ddd;color:#666;"><strong>When</strong></td><td style="padding:10px;border-bottom:1px solid #ddd;">' + displayTime + '</td></tr>' +
+            '<tr><td style="padding:10px;border-bottom:1px solid #ddd;color:#666;"><strong>Where</strong></td><td style="padding:10px;border-bottom:1px solid #ddd;">In-Person &middot; Gwinnett County, GA</td></tr>' +
+            '<tr><td style="padding:10px;color:#666;"><strong>Duration</strong></td><td style="padding:10px;">60 minutes</td></tr>' +
+            '</table>' +
+            '<p>A specialist will reach out shortly to confirm your address and any additional details.</p>' +
+            '<p style="color:#666;font-size:13px;">Thank you for choosing Costco Home Services!</p>' +
+            '</div>' +
+            '<div style="background:#005DAA;padding:12px;text-align:center;">' +
+            '<p style="color:#fff;margin:0;font-size:12px;">&copy; Costco Home Services &mdash; Gwinnett County, GA</p>' +
+            '</div></div>'
+        );
+
+        Messaging.SendEmailResult[] results = Messaging.sendEmail(
+            new List<Messaging.SingleEmailMessage>{ mail }, false
+        );
+        if (!results.isEmpty() && !results[0].isSuccess()) {
+            List<String> errMsgs = new List<String>();
+            for (Messaging.SendEmailError err : results[0].getErrors()) {
+                errMsgs.add(err.getStatusCode() + ': ' + err.getMessage());
+            }
+            System.debug('Confirmation email failed: ' + String.join(errMsgs, '; '));
+        }
     }
 }
