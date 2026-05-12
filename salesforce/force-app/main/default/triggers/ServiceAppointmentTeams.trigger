@@ -1,15 +1,15 @@
 /**
- * After a ServiceAppointment is inserted, asynchronously creates a Teams
- * online meeting via the Microsoft Graph API and writes the join URL back
- * to TeamsJoinUrl__c.
+ * After a ServiceAppointment is inserted, asynchronously creates a Zoom
+ * meeting via the Zoom REST API and writes the join URL to MeetingJoinUrl__c.
  *
- * Uses @future so the callout never blocks the booking transaction.
+ * Uses @future (callout=true) so the API call never blocks the booking.
+ * When Teams integration is enabled later, swap ZoomMeetingService for
+ * TeamsMeetingService — no other changes needed.
  */
 trigger ServiceAppointmentTeams on ServiceAppointment (after insert) {
     for (ServiceAppointment sa : Trigger.new) {
-        // Only create a meeting if no join URL already exists
-        if (String.isBlank(sa.TeamsJoinUrl__c)) {
-            TeamsMeetingService.createMeetingForAppointment(sa.Id);
+        if (String.isBlank(sa.MeetingJoinUrl__c)) {
+            ZoomMeetingService.createMeetingForAppointment(sa.Id);
         }
     }
 }
