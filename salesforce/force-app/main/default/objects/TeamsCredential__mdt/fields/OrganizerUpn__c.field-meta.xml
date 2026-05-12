@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>OrganizerUpn__c</fullName>
+    <externalId>false</externalId>
+    <label>Organizer UPN</label>
+    <description>Microsoft 365 email (UPN) of the user who will own the Teams meetings, e.g. admin@tenant.onmicrosoft.com</description>
+    <length>255</length>
+    <required>false</required>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>
